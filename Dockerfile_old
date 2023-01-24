@@ -1,0 +1,20 @@
+FROM selenium/standalone-chrome:4.7.2-20221219
+RUN sudo mkdir -p etc/opt/chrome/policies/managed/
+COPY auto_select_certificate.json etc/opt/chrome/policies/managed/
+COPY client.core.coregcp.kaymera.com.pfx /home/seluser/client.core.coregcp.kaymera.com.pfx
+RUN mkdir -p /home/seluser/.pki/nssdb \
+    && certutil -d /home/seluser/.pki/nssdb -N \
+    && certutil -d sql:/home/seluser/.pki/nssdb -L \
+    && certutil -d sql:/home/seluser/.pki/nssdb -A -t "CT,C,C" -n CertCA -i /usr/local/share/ca-certificates/certificate.crt \
+    && certutil -d sql:/home/seluser/.pki/nssdb -L
+    
+    
+RUN apt -qqy update \
+    && apt -qqy --no-install-recommends install \
+    libnss3-tools \
+    libnss3-1d 
+   
+USER seluser
+    
+    
+#TODO import certifidocker cate to Chrome
